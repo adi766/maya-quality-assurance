@@ -5,3 +5,4 @@
 + MAYAVERSION:2018 qualityAssurance 0.1.0 <PATH>
 + MAYAVERSION:2019 qualityAssurance 0.1.0 <PATH>
 + MAYAVERSION:2020 qualityAssurance 0.1.0 <PATH>
++ MAYAVERSION:2022 qualityAssurance 0.1.0 <PATH>

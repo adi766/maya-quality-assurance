@@ -3,7 +3,7 @@ from .. import checks, collections
 
 
 class CollectionsWidget(utils.QWidget):
-    currentIndexChanged = utils.Signal(unicode)
+    currentIndexChanged = utils.Signal(str)
 
     def __init__(self, parent, collection):
         utils.QWidget.__init__(self, parent)
@@ -19,7 +19,7 @@ class CollectionsWidget(utils.QWidget):
         self.collection = utils.QComboBox(self)
         self.collection.addItems(overview)
         self.collection.setCurrentIndex(
-            overview.index(collection)
+            list(overview).index(collection)
             if collection in overview
             else 0
         )
@@ -356,7 +356,7 @@ class QualityAssuranceWidget(utils.QWidget):
         # get checks
         data = checks.getChecksFromCollection(collection)
         number = 1
-        for categoryName, checkList in data.iteritems():
+        for categoryName, checkList in data.items():
             # create category
             category = CategoryWidget(self, categoryName)
             self.layout.insertWidget(self.layout.count()-1, category)
