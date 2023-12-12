@@ -154,7 +154,7 @@ class QualityAssurance(object):
                 # quality assurance checks.
 
                 if self.isSelectable() and (
-                        type(error) in [str, unicode]
+                        type(error) in [str]
                         and not cmds.objExists(error)
                 ):
                     self._errors.remove(error)
