@@ -15,7 +15,7 @@ class FreezeTransforms(QualityAssurance):
         self._categories = ["Modelling"]
         self._selectable = True
 
-        self._ignoreNodes = ["|persp", "|front", "|top", "|side"]
+        self._ignoreNodes = ["|persp", "|front", "|top", "|side", "|left", "|back", "|bottom"]
 
         self._attributes = [
             ".tx", "ty", "tz",
