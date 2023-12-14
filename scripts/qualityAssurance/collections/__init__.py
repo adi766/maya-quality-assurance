@@ -18,6 +18,7 @@ COLLECTION = OrderedDict(
                 "UV",
                 "Rigging",
                 "Skinning",
+                "Implementation",
                 "Shaders",
                 "Scene"
             ]
