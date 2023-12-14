@@ -12,8 +12,13 @@ from collections import OrderedDict
 COLLECTION = OrderedDict(
     [
         (
-            "animation", [
-                "Animation",
+            "Overall QA", [
+                "Modelling",
+                "Geometry",
+                "UV",
+                "Rigging",
+                "Skinning",
+                "Shaders",
                 "Scene"
             ]
         ),
@@ -23,8 +28,8 @@ COLLECTION = OrderedDict(
                 "Geometry",
                 "UV",
                 "Shaders",
-                "Render Stats",
-                "Scene"
+                "Scene",
+                "Render Stats"
             ]
         ),
         (
@@ -32,7 +37,12 @@ COLLECTION = OrderedDict(
                 "Rigging",
                 "Skinning",
                 "Shaders",
-                "Render Stats",
+                "Scene"
+            ]
+        ),
+        (
+            "animation", [
+                "Animation",
                 "Scene"
             ]
         ),

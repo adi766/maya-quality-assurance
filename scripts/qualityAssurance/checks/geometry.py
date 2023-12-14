@@ -65,6 +65,96 @@ class EmptyMesh(QualityAssurance):
             for error in nmEdges + nmVertices:
                 yield error
 
+class OverlappingFaces(QualityAssurance):
+    """
+    Find meshes that have overlapping faces. When fixing this error the
+    overlapping faces will be deleted.
+    """
+    def __init__(self):
+        QualityAssurance.__init__(self)
+
+        self._name = "Overlapping Faces"
+        self._message = "{0} mesh(es) with overlapping face(s)"
+        self._categories = ["Geometry"]
+        self._selectable = True
+
+    # ------------------------------------------------------------------------
+
+    def _find(self):
+        """
+        :return: Overlapping faces
+        :rtype: generator
+        """
+        # variables
+        obj = OpenMaya.MObject()
+
+        # get mesh iterator
+        meshIter = self.lsApi(nodeType=OpenMaya.MFn.kMesh)
+
+        # iterate meshes
+        while not meshIter.isDone():
+            # variables
+            faces = []
+            meshIter.getDependNode(obj)
+            dagNode = OpenMaya.MDagPath.getAPathTo(obj)
+            path = dagNode.fullPathName()
+
+            # ignore references
+            if cmds.referenceQuery(path, inr=True):
+                meshIter.next()
+                continue
+
+            # iterate faces
+            faceIter = OpenMaya.MItMeshPolygon(dagNode)
+
+            # variable
+            allPoints = []
+            allIndices = []
+
+            # loop faces
+            while not faceIter.isDone():
+                # get world space positions
+                points = OpenMaya.MPointArray()
+                faceIter.getPoints(points, OpenMaya.MSpace.kWorld)
+
+                # sort points
+                points = [
+                    sorted(
+                        [
+                            round(points[i][0], 8),
+                            round(points[i][1], 8),
+                            round(points[i][2], 8)
+                        ]
+                    )
+                    for i in range(points.length())
+                ]
+
+                # store points and indices
+                allPoints.append(str(sorted(points)))
+                allIndices.append(faceIter.index())
+
+                faceIter.next()
+            meshIter.next()
+
+            # find matching faces
+            seen = set()
+            for i, p in zip(allIndices, allPoints):
+                if p not in seen:
+                    seen.add(p)
+                    continue
+
+                faces.append("{0}.f[{1}]".format(path, i))
+
+            if not faces:
+                continue
+
+            yield faces
+
+    def _fix(self, faces):
+        """
+        :param list faces:
+        """
+        cmds.delete(faces)
 
 class ZeroEdgeLength(QualityAssurance):
     """
@@ -167,97 +257,6 @@ class ZeroAreaFaces(QualityAssurance):
                 faceIter.next()
             meshIter.next()
 
-
-class OverlappingFaces(QualityAssurance):
-    """
-    Find meshes that have overlapping faces. When fixing this error the
-    overlapping faces will be deleted.
-    """
-    def __init__(self):
-        QualityAssurance.__init__(self)
-
-        self._name = "Overlapping Faces"
-        self._message = "{0} mesh(es) with overlapping face(s)"
-        self._categories = ["Geometry"]
-        self._selectable = True
-
-    # ------------------------------------------------------------------------
-
-    def _find(self):
-        """
-        :return: Overlapping faces
-        :rtype: generator
-        """
-        # variables
-        obj = OpenMaya.MObject()
-
-        # get mesh iterator
-        meshIter = self.lsApi(nodeType=OpenMaya.MFn.kMesh)
-
-        # iterate meshes
-        while not meshIter.isDone():
-            # variables
-            faces = []
-            meshIter.getDependNode(obj)
-            dagNode = OpenMaya.MDagPath.getAPathTo(obj)
-            path = dagNode.fullPathName()
-
-            # ignore references
-            if cmds.referenceQuery(path, inr=True):
-                meshIter.next()
-                continue
-
-            # iterate faces
-            faceIter = OpenMaya.MItMeshPolygon(dagNode)
-
-            # variable
-            allPoints = []
-            allIndices = []
-
-            # loop faces
-            while not faceIter.isDone():
-                # get world space positions
-                points = OpenMaya.MPointArray()
-                faceIter.getPoints(points, OpenMaya.MSpace.kWorld)
-
-                # sort points
-                points = [
-                    sorted(
-                        [
-                            round(points[i][0], 8),
-                            round(points[i][1], 8),
-                            round(points[i][2], 8)
-                        ]
-                    )
-                    for i in range(points.length())
-                ]
-
-                # store points and indices
-                allPoints.append(str(sorted(points)))
-                allIndices.append(faceIter.index())
-
-                faceIter.next()
-            meshIter.next()
-
-            # find matching faces
-            seen = set()
-            for i, p in zip(allIndices, allPoints):
-                if p not in seen:
-                    seen.add(p)
-                    continue
-
-                faces.append("{0}.f[{1}]".format(path, i))
-
-            if not faces:
-                continue
-
-            yield faces
-
-    def _fix(self, faces):
-        """
-        :param list faces:
-        """
-        cmds.delete(faces)
 
 
 class NGonFaces(QualityAssurance):

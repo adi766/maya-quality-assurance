@@ -32,6 +32,6 @@ class QualityAssuranceWindow(utils.QWidget):
         self.collections.currentIndexChanged.connect(self.container.refresh)
 
 
-def show(collection="modelling"):
+def show(collection="Overall QA"):
     qa = QualityAssuranceWindow(utils.mayaWindow(), collection)
     qa.show()
