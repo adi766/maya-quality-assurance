@@ -147,13 +147,13 @@ class MaximumInfluences(QualityAssurance):
         infIds, infPaths = skin.getInfluencesApi(skinFn)
         infIdsLocked = {
             i: cmds.getAttr("{0}.liw".format(infPaths[i]))
-            for _, i in infIds.iteritems()
+            for _, i in infIds.items()
         }
         
         # get weights
         weights = skin.getWeightsApi(skinFn, infIds)
 
-        for vId, vWeights in weights.iteritems():
+        for vId, vWeights in weights.items():
             # variable
             nWeights = vWeights.copy()
         

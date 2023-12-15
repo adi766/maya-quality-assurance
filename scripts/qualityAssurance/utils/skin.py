@@ -18,7 +18,7 @@ def getInfluencesApi(skinFn):
     # create list with full path of influences
     infIds = {}
     infPaths = []
-    for x in xrange(infDags.length()):
+    for x in range(infDags.length()):
         infPath = infDags[x].fullPathName()
         infId = int(skinFn.indexForInfluenceObject(infDags[x]))
         infIds[infId] = x
@@ -46,7 +46,7 @@ def getWeightsApiGenerator(skinFn, infIds):
     # the weights are stored in dictionary, the key is the vertId, 
     # the value is another dictionary whose key is the influence id and 
     # value is the weight for that influence
-    for vId in xrange(wlPlug.numElements()):
+    for vId in range(wlPlug.numElements()):
         vWeights = {}
         # tell the weights attribute which vertex id it represents
         wPlug.selectAncestorLogicalIndex(vId, wlAttr)
@@ -91,7 +91,7 @@ def getWeightsApi(skinFn, infIds):
     # the weights are stored in dictionary, the key is the vertId, 
     # the value is another dictionary whose key is the influence id and 
     # value is the weight for that influence
-    for vId in xrange(wlPlug.numElements()):
+    for vId in range(wlPlug.numElements()):
         vWeights = {}
         # tell the weights attribute which vertex id it represents
         wPlug.selectAncestorLogicalIndex(vId, wlAttr)

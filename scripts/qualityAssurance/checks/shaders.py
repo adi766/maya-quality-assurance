@@ -130,7 +130,7 @@ class FaceAssignedShading(QualityAssurance):
             overview[shape].append(face)
 
         # loop overview
-        for shape, remove in overview.iteritems():
+        for shape, remove in overview.items():
             if len(remove) != cmds.polyEvaluate(shape, face=True):
                 raise RuntimeError("Incomplete Face Assigment")
 

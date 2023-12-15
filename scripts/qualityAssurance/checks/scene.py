@@ -427,7 +427,7 @@ class HyperBookmarks(QualityAssurance):
             pass
         finally:
             # reset connections locked state
-            for node, state in hyperPositionStored.iteritems():
+            for node, state in hyperPositionStored.items():
                 cmds.lockNode(node, lock=state)
 
 
