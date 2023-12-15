@@ -2,9 +2,40 @@ from maya import cmds
 from ..utils import QualityAssurance, reference
 
 
+class CustomShaderGroup(QualityAssurance):
+    """
+    Meshes will be checked to see if they have the custom GLSL shaders 
+    applied or not.
+    """
+    def __init__(self):
+        QualityAssurance.__init__(self)
+
+        self._name = "Custom GLSL shaders applied"
+        self._message = "{0} object(s) are not assigned with Custom shader"
+        self._categories = ["Implementation"]
+        self._selectable = True
+
+    # ------------------------------------------------------------------------
+
+    def _find(self):
+        """
+        :return: Meshes without shading group attachment
+        :rtype: generator
+        """
+        meshes = self.ls(type="mesh", noIntermediate=True, l=True)
+        for mesh in meshes:
+            shadingGroups = cmds.listConnections(mesh, type="shadingEngine")
+            shaderList = cmds.ls(cmds.listConnections(shadingGroups),materials=1)
+            for shdrs in shaderList:
+                shadersType = cmds.nodeType(shdrs)
+                if shadersType != "GLSLShader":
+                    yield mesh
+
+
 class CustomShaderTechnique(QualityAssurance):
     """
-    Custom Shaders (GLSL) will be checked 
+    Custom Shaders (GLSL) will be checked if their technique is Uber-Transparent.
+    Fixing it will set all the GLSLShaders to Uber.
     """
     def __init__(self):
         QualityAssurance.__init__(self)
@@ -53,34 +84,4 @@ class CustomShaderTechnique(QualityAssurance):
         for glsl in glslShaders:
             for attr, value in self.defaultState:
                 cmds.setAttr(glsl+ attr, value,type= "string")
-
-
-class CustomShaderGroup(QualityAssurance):
-    """
-    Meshes will be checked to see if they have the custom GLSL shaders 
-    applied or not.
-    """
-    def __init__(self):
-        QualityAssurance.__init__(self)
-
-        self._name = "Custom GLSL shaders applied"
-        self._message = "{0} object(s) are not assigned with Custom shader"
-        self._categories = ["Implementation"]
-        self._selectable = True
-
-    # ------------------------------------------------------------------------
-
-    def _find(self):
-        """
-        :return: Meshes without shading group attachment
-        :rtype: generator
-        """
-        meshes = self.ls(type="mesh", noIntermediate=True, l=True)
-        for mesh in meshes:
-            shadingGroups = cmds.listConnections(mesh, type="shadingEngine")
-            shaderList = cmds.ls(cmds.listConnections(shadingGroups),materials=1)
-            for shdrs in shaderList:
-                shadersType = cmds.nodeType(shdrs)
-                if shadersType != "GLSLShader":
-                    yield mesh
 
