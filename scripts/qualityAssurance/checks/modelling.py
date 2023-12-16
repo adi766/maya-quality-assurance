@@ -80,6 +80,49 @@ class FreezeTransforms(QualityAssurance):
         )
 
 
+class ZeroPivot(QualityAssurance):
+    """
+    Models will be checked to see if their pivots are not on the origin. When
+    fixing this error Models will set to origin.
+    """
+    def __init__(self):
+        QualityAssurance.__init__(self)
+
+        self._name = "Zero Pivot"
+        self._message = "{0} pivot(s) are not on origin"
+        self._categories = ["Modelling"]
+        self._selectable = True
+
+    # ------------------------------------------------------------------------
+
+    # ------------------------------------------------------------------------
+
+    def _find(self):
+        """
+        :return: Unfrozen transforms
+        :rtype: generator
+        """
+        shapesList = self.ls(type="mesh")
+        transformList = cmds.listRelatives(shapesList,parent=True)
+
+        if transformList == None:
+            pass
+        else:
+            for transform in transformList:
+                if cmds.xform (transform,q=1, ws=1, a=1, rp= 1) != [0,0,0]:
+                    yield transform
+
+    def _fix(self, transform):
+        """
+        :param str transform:
+        """
+        shapesList = self.ls(type="mesh")
+        transformList = cmds.listRelatives(shapesList,parent=True)
+
+        for transform in transformList:
+            cmds.xform (transform, ws=1, a=1, rp= [0 ,0, 0])
+
+
 class DeleteHistory(QualityAssurance):
     """
     Mesh shapes will be checked to see if they have history attached to them.
