@@ -102,8 +102,8 @@ class ZeroPivot(QualityAssurance):
         :return: Unfrozen transforms
         :rtype: generator
         """
-        shapesList = self.ls(type="mesh")
-        transformList = cmds.listRelatives(shapesList,parent=True)
+        shapesList = self.ls(type="mesh",l=True)
+        transformList = cmds.listRelatives(shapesList,parent=True,f=1)
 
         if transformList == None:
             pass
@@ -116,8 +116,8 @@ class ZeroPivot(QualityAssurance):
         """
         :param str transform:
         """
-        shapesList = self.ls(type="mesh")
-        transformList = cmds.listRelatives(shapesList,parent=True)
+        shapesList = self.ls(type="mesh",l=True)
+        transformList = cmds.listRelatives(shapesList,parent=True,f=1)
 
         for transform in transformList:
             cmds.xform (transform, ws=1, a=1, rp= [0 ,0, 0])
