@@ -351,6 +351,38 @@ class LaminaFaces(QualityAssurance):
             for error in laminaFaces:
                 yield error
 
+class DeleteColorSets(QualityAssurance):
+    """
+    Meshes will be checked if they have color set(s).
+    When fixing this will delete all the color sets.
+    """
+    def __init__(self):
+        QualityAssurance.__init__(self)
+
+        self._name = "No Color Sets"
+        self._message = "{0} mesh(es) contain color sets"
+        self._categories = ["Geometry"]
+        self._selectable = True
+
+    # ------------------------------------------------------------------------
+
+    def _find(self):
+        """
+        :return: Meshes with Color Sets
+        :rtype: generator
+        """
+
+        transforms = self.ls(transforms=True, l=True)
+
+        for mesh in transforms:
+            if len(cmds.polyColorSet( mesh, q=True, acs=True ) or []) > 0:
+                yield mesh
+
+    def _fix(self, mesh):
+        """
+        :param str mesh:
+        """
+        cmds.polyColorSet(mesh, acs=True, d=True)
 
 class LockedNormals(QualityAssurance):
     """
