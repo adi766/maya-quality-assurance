@@ -1,4 +1,4 @@
-from maya import cmds, OpenMaya, OpenMayaAnim
+from maya import cmds, OpenMaya, OpenMayaAnim, mel
 from ..utils import QualityAssurance, reference, skin, api
 
 
@@ -81,7 +81,7 @@ class MaximumInfluences(QualityAssurance):
         QualityAssurance.__init__(self)
 
         self._name = "Maximum Influences"
-        self._message = "{0} skin cluster(s) exceed the maximum influences"
+        self._message = "{0} skin cluster(s) exceed the maximum influences of 4"
         self._categories = ["Skinning"]
         self._selectable = True
 
@@ -93,114 +93,49 @@ class MaximumInfluences(QualityAssurance):
         :rtype: generator
         """
         # variables
-        obj = OpenMaya.MObject()
 
-        # get skin cluster iterator
-        iterator = self.lsApi(nodeType=OpenMaya.MFn.kSkinClusterFilter)
-        
-        # iterate skin cluster
-        while not iterator.isDone():
-            # variables
-            iterator.getDependNode(obj)
-            depNode = OpenMaya.MFnDependencyNode(obj)
-            skinFn = OpenMayaAnim.MFnSkinCluster(obj)
-            skinCluster = depNode.name()
-            
-            # skin cluster data
-            maintain = "{0}.maintainMaxInfluences".format(skinCluster)
-            maintain = cmds.getAttr(maintain)
-            maxInfluences = "{0}.maxInfluences".format(skinCluster)
-            maxInfluences = cmds.getAttr(maxInfluences)
+        shapesList = cmds.ls(type="mesh",l=True)
+        transformList = cmds.listRelatives(shapesList,parent=True,f=1) or []
+        maxInfluence   = 4
 
-            # skip if max influences doesn't have to be maintained
-            if not maintain:
-                iterator.next()
-                continue
-            
-            # get influences
-            infIds, infPaths = skin.getInfluencesApi(skinFn)
-            
-            # get weights
-            for weight in skin.getWeightsApiGenerator(skinFn, infIds):
-                if len([w for w in weight.values() if w]) > maxInfluences:
-                    yield skinCluster
-                    break
+        for transform in transformList:
+            try:
+                skin = mel.eval('findRelatedSkinCluster {}'.format(transform))
+                skinMaxInf = cmds.skinCluster(skin, q=1, mi=1)
+                if skinMaxInf > maxInfluence:
+                    yield skin
+            except:
+                pass
 
-            iterator.next()
      
-    def _fix(self, skinCluster):
+    def _fix(self, skin):
         """
         :param str skinCluster:
         """
-        obj = api.toMObject(skinCluster)
-        skinFn = OpenMayaAnim.MFnSkinCluster(obj)
-        
-        # normalize
-        normalizePath = "{0}.normalizeWeights".format(skinCluster)
-        normalize = cmds.getAttr(normalizePath)
-         
-        # max influence data
-        maxInfluencesPath = "{0}.maxInfluences".format(skinCluster)
-        maxInfluences = cmds.getAttr(maxInfluencesPath)
-        
-        # get influences
-        infIds, infPaths = skin.getInfluencesApi(skinFn)
-        infIdsLocked = {
-            i: cmds.getAttr("{0}.liw".format(infPaths[i]))
-            for _, i in infIds.items()
-        }
-        
-        # get weights
-        weights = skin.getWeightsApi(skinFn, infIds)
+        shapesList = cmds.ls(type="mesh",l=True)
+        transformList = cmds.listRelatives(shapesList,parent=True,f=1) or []
+        maxInfluence   = 4
 
-        for vId, vWeights in weights.items():
-            # variable
-            nWeights = vWeights.copy()
-        
-            # sort weights
-            ordered = sorted(vWeights.items(), key=lambda x: -x[1])
-        
-            keepIndices = [
-                index 
-                for i, (index, weight) in enumerate(ordered) 
-                if i <= maxInfluences-1
-            ]
-            removeIndices = [
-                index 
-                for i, (index, weight) in enumerate(ordered) 
-                if i > maxInfluences-1
-            ]
-            
-            # remove weights
-            for i in removeIndices:
-                nWeights[i] = 0
-            
-            # normalize weights
-            if normalize == 1:
-                # get normalizable weights
-                normalizeIndices = [
-                    i
-                    for i in keepIndices
-                    if not infIdsLocked.get(i)
-                ]
+        for transform in transformList:
+            try:
+                skin = mel.eval('findRelatedSkinCluster {}'.format(transform))
+                cmds.setAttr("{}.maxInfluences".format(skin))
+                cmds.setAttr("{}.maxInfluences".format(skin), maxInfluence)
+                cmds.setAttr("{}.maintainMaxInfluences".format(skin), True)
+                cmds.setAttr("{}.normalizeWeights".format(skin), 1)
+                cmds.skinPercent(skin, normalize=True)
                 
-                # if no weights can be normalized, normalize all
-                if not normalizeIndices:
-                    normalizeIndices = keepIndices
-                
-                # get normalizing multiplier
-                total = sum([vWeights.get(i) for i in normalizeIndices])
-                multiplier = 1/total
-                
-                # normalize indices
-                for i in normalizeIndices:
-                    nWeights[i] = vWeights.get(i) * multiplier       
-            
-            # set weights
-            for infId, infValue in nWeights.items():
-                infAttr = "{0}.weightList[{1}].weights[{2}]".format(
-                    skinCluster,
-                    vId,
-                    infId
-                )
-                cmds.setAttr(infAttr, infValue)
+                vertsCount = cmds.polyEvaluate(transform, v=True)
+                for vert in range(vertsCount):
+                    vertex = "{}.vtx[{}]".format(transform, vert)
+                    influenceJoints = cmds.skinPercent(skin, vertex, transform=None, query=True, ignoreBelow=0.0000001)
+                    while len(influenceJoints) > maxInfluence:
+                        weights = sorted(cmds.skinPercent(skin, vertex, value=True, query=True, ignoreBelow=0.0000001),reverse=True)
+                        for jnt in influenceJoints:
+                            jointValue = cmds.skinPercent(skin, vertex, transform=jnt, query=True)
+                            if jointValue == weights[-1]:
+                                cmds.skinPercent(skin, vertex, transformValue=[(jnt, 0)])
+                                print("removing {0} from {1}".format(jointValue, vertex))
+                        influenceJoints = cmds.skinPercent(skin, vertex, transform=None, query=True, ignoreBelow=0.0000001)
+            except:
+                pass
