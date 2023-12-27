@@ -14,6 +14,8 @@ class QualityAssuranceWindow(utils.QWidget):
             utils.QIcon(utils.getIconPath("QA_icon.png"))
         )
         self.resize(500, 500)
+        self.setAttribute(utils.Qt.WA_StyledBackground, True)
+        self.setStyleSheet('background-color: #1e1b18; color : #cccee0')
 
         # create layout
         layout = utils.QVBoxLayout(self)
