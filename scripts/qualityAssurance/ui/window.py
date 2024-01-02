@@ -35,5 +35,10 @@ class QualityAssuranceWindow(utils.QWidget):
 
 
 def show(collection="Overall QA"):
+    global qa
+    try:
+        qa.close()
+    except:
+        pass
     qa = QualityAssuranceWindow(utils.mayaWindow(), collection)
     qa.show()
