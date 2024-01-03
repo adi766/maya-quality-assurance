@@ -182,23 +182,8 @@ class DeleteHistory(QualityAssurance):
 
 
 class TransformSuffix(QualityAssurance):
-    """Validates transform suffix based on the type of its children shapes.
-
-    Suffices must be:
-        - mesh:
-            _GEO (regular geometry)
-            _GES (geometry to be smoothed at render)
-            _GEP (proxy geometry; usually not to be rendered)
-            _OSD (open subdiv smooth at rendertime)
-        - nurbsCurve: _CRV
-        - nurbsSurface: _NRB
-        - locator: _LOC
-        - null/group: _GRP
-
-    .. warning::
-        This grabs the first child shape as a reference and doesn't use the
-        others in the check.
-
+    """
+    Checks if the model's suffix is other than "_GEO", "_Geo", or "Geo"
     """
     def __init__(self):
         QualityAssurance.__init__(self)
@@ -225,15 +210,6 @@ class TransformSuffix(QualityAssurance):
             for suffix in suffices:
                 if not transform.upper().endswith(suffix.upper()) and not transform.endswith(suffices[2]):
                     yield transform
-
-
-
-    def _fix(self,transforms):
-        """
-        :param str transform:
-        cant fix automatically because its impossible to know what specifically is wrong
-        """
-        print(" Incorrectly named transforms, please fix: " + transforms)
 
 
 class DeleteAnimation(QualityAssurance):
