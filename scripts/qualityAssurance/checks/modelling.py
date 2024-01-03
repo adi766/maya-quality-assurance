@@ -181,6 +181,61 @@ class DeleteHistory(QualityAssurance):
         cmds.delete(mesh, ch=True)
 
 
+class TransformSuffix(QualityAssurance):
+    """Validates transform suffix based on the type of its children shapes.
+
+    Suffices must be:
+        - mesh:
+            _GEO (regular geometry)
+            _GES (geometry to be smoothed at render)
+            _GEP (proxy geometry; usually not to be rendered)
+            _OSD (open subdiv smooth at rendertime)
+        - nurbsCurve: _CRV
+        - nurbsSurface: _NRB
+        - locator: _LOC
+        - null/group: _GRP
+
+    .. warning::
+        This grabs the first child shape as a reference and doesn't use the
+        others in the check.
+
+    """
+    def __init__(self):
+        QualityAssurance.__init__(self)
+
+        self._name = "Mesh suffix naming convention"
+        self._message = "{0} mesh(es) with wrong naming"
+        self._categories = ["Modelling"]
+        self._selectable = True
+
+    # ------------------------------------------------------------------------
+
+    def _find(self):
+        """
+        :return: list of namespaces
+        :rtype: generator
+        """
+        suffices = ["_GEO", "_Geo", "Geo"]
+         
+        shapesList = self.ls(type="mesh",l=True)
+        transformList = cmds.listRelatives(shapesList,parent=True,f=1) or []
+
+        for transform in transformList:
+
+            for suffix in suffices:
+                if not transform.upper().endswith(suffix.upper()) and not transform.endswith(suffices[2]):
+                    yield transform
+
+
+
+    def _fix(self,transforms):
+        """
+        :param str transform:
+        cant fix automatically because its impossible to know what specifically is wrong
+        """
+        print(" Incorrectly named transforms, please fix: " + transforms)
+
+
 class DeleteAnimation(QualityAssurance):
     """
     All animation curves will be added to the error list. When fixing this
