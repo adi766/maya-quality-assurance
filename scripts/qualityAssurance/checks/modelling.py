@@ -109,7 +109,7 @@ class ZeroPivot(QualityAssurance):
             pass
         else:
             for transform in transformList:
-                if cmds.xform (transform,q=1, ws=1, a=1, rp= 1) != [0,0,0]:
+                if cmds.xform (transform,q=1, ws=1, a=1, rp= 1) != [0,0,0] or cmds.xform (transform,q=1, ws=1, a=1, sp= 1) != [0,0,0]:
                     yield transform
 
     def _fix(self, transform):
@@ -120,7 +120,7 @@ class ZeroPivot(QualityAssurance):
         transformList = cmds.listRelatives(shapesList,parent=True,f=1)
 
         for transform in transformList:
-            cmds.xform (transform, ws=1, a=1, rp= [0 ,0, 0])
+            cmds.xform (transform, ws=1, a=1, rp= [0 ,0, 0],sp= [0 ,0, 0])
 
 
 class DeleteHistory(QualityAssurance):
