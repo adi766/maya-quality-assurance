@@ -291,14 +291,14 @@ class QualityAssuranceWidget(utils.QWidget):
         # create check all
         findAll = utils.QPushButton(loop)
         findAll.setFont(utils.FONT)
-        findAll.setText("Find All")
+        findAll.setText("Analyse")
         findAll.released.connect(self.doFindAll)
         loopLayout.addWidget(findAll)
 
         # create fix all
         fixAll = utils.QPushButton(loop)
         fixAll.setFont(utils.FONT)
-        fixAll.setText("Fix All")
+        fixAll.setText("Resolve All")
         fixAll.released.connect(self.doFixAll)
         loopLayout.addWidget(fixAll)
 
