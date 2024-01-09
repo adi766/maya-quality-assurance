@@ -12,13 +12,13 @@ from collections import OrderedDict
 COLLECTION = OrderedDict(
     [
         (
-            "Overall QA", [
+            "Overall QA/ Pre-Implementation", [
                 "Modelling",
                 "Geometry",
                 "UV",
                 "Rigging",
                 "Skinning",
-                "Implementation",
+                "Custom Shaders",
                 "Shaders",
                 "Scene"
             ]

@@ -12,7 +12,7 @@ class CustomShaderGroup(QualityAssurance):
 
         self._name = "Custom GLSL shaders applied"
         self._message = "{0} object(s) are not assigned with Custom shader"
-        self._categories = ["Implementation"]
+        self._categories = ["Custom Shaders"]
         self._selectable = True
 
     # ------------------------------------------------------------------------
@@ -42,7 +42,7 @@ class CustomShaderTechnique(QualityAssurance):
 
         self._name = "Shader Technique"
         self._message = "{0} shader(s) set to Uber-Transparent"
-        self._categories = ["Implementation"]
+        self._categories = ["Custom Shaders"]
         self._selectable = True
 
 

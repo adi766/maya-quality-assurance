@@ -9,7 +9,7 @@ class QualityAssuranceWindow(utils.QWidget):
         self.setParent(parent)
         self.setWindowFlags(utils.Qt.Window)
 
-        self.setWindowTitle("Quality Assurance")
+        self.setWindowTitle("Quality Assurance Tool :)")
         self.setWindowIcon(
             utils.QIcon(utils.getIconPath("QA_icon.png"))
         )
@@ -34,7 +34,7 @@ class QualityAssuranceWindow(utils.QWidget):
         self.collections.currentIndexChanged.connect(self.container.refresh)
 
 
-def show(collection="Overall QA"):
+def show(collection="Overall QA/ Pre-Implementation"):
     global qa
     try:
         qa.close()
