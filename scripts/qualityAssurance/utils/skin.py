@@ -18,13 +18,20 @@ def getInfluencesApi(skinFn):
     # create list with full path of influences
     infIds = {}
     infPaths = []
-    for x in range(infDags.length()):
-        infPath = infDags[x].fullPathName()
-        infId = int(skinFn.indexForInfluenceObject(infDags[x]))
-        infIds[infId] = x
-        infPaths.append(infPath)
-        
-    return infIds, infPaths
+    if sys.version.startswith("3"):
+        for x in range(infDags.length()):
+            infPath = infDags[x].fullPathName()
+            infId = int(skinFn.indexForInfluenceObject(infDags[x]))
+            infIds[infId] = x
+            infPaths.append(infPath)
+        return infIds, infPaths
+    elif sys.version.startswith("3"):
+        for x in xrange(infDags.length()):
+            infPath = infDags[x].fullPathName()
+            infId = int(skinFn.indexForInfluenceObject(infDags[x]))
+            infIds[infId] = x
+            infPaths.append(infPath)
+        return infIds, infPaths
     
     
 def getWeightsApiGenerator(skinFn, infIds):
@@ -46,28 +53,52 @@ def getWeightsApiGenerator(skinFn, infIds):
     # the weights are stored in dictionary, the key is the vertId, 
     # the value is another dictionary whose key is the influence id and 
     # value is the weight for that influence
-    for vId in range(wlPlug.numElements()):
-        vWeights = {}
-        # tell the weights attribute which vertex id it represents
-        wPlug.selectAncestorLogicalIndex(vId, wlAttr)
-        
-        # get the indice of all non-zero weights for this vert
-        wPlug.getExistingArrayAttributeIndices(wInfIds)
-
-        # create a copy of the current wPlug
-        infPlug = OpenMaya.MPlug(wPlug)
-        for infId in wInfIds:
-            # tell the infPlug it represents the current influence id
-            infPlug.selectAncestorLogicalIndex(infId, wAttr)
+    if sys.version.startswith("3"):
+        for vId in range(wlPlug.numElements()):
+            vWeights = {}
+            # tell the weights attribute which vertex id it represents
+            wPlug.selectAncestorLogicalIndex(vId, wlAttr)
             
-            # add this influence and its weight to this verts weights
-            try:
-                vWeights[infIds[infId]] = infPlug.asDouble()
-            except KeyError:
-                # assumes a removed influence
-                pass
+            # get the indice of all non-zero weights for this vert
+            wPlug.getExistingArrayAttributeIndices(wInfIds)
+
+            # create a copy of the current wPlug
+            infPlug = OpenMaya.MPlug(wPlug)
+            for infId in wInfIds:
+                # tell the infPlug it represents the current influence id
+                infPlug.selectAncestorLogicalIndex(infId, wAttr)
                 
-        yield vWeights
+                # add this influence and its weight to this verts weights
+                try:
+                    vWeights[infIds[infId]] = infPlug.asDouble()
+                except KeyError:
+                    # assumes a removed influence
+                    pass
+                    
+            yield vWeights
+    elif sys.version.startswith("2"):
+        for vId in xrange(wlPlug.numElements()):
+            vWeights = {}
+            # tell the weights attribute which vertex id it represents
+            wPlug.selectAncestorLogicalIndex(vId, wlAttr)
+            
+            # get the indice of all non-zero weights for this vert
+            wPlug.getExistingArrayAttributeIndices(wInfIds)
+
+            # create a copy of the current wPlug
+            infPlug = OpenMaya.MPlug(wPlug)
+            for infId in wInfIds:
+                # tell the infPlug it represents the current influence id
+                infPlug.selectAncestorLogicalIndex(infId, wAttr)
+                
+                # add this influence and its weight to this verts weights
+                try:
+                    vWeights[infIds[infId]] = infPlug.asDouble()
+                except KeyError:
+                    # assumes a removed influence
+                    pass
+                    
+            yield vWeights
     
     
 def getWeightsApi(skinFn, infIds):
@@ -91,27 +122,54 @@ def getWeightsApi(skinFn, infIds):
     # the weights are stored in dictionary, the key is the vertId, 
     # the value is another dictionary whose key is the influence id and 
     # value is the weight for that influence
-    for vId in range(wlPlug.numElements()):
-        vWeights = {}
-        # tell the weights attribute which vertex id it represents
-        wPlug.selectAncestorLogicalIndex(vId, wlAttr)
-        
-        # get the indice of all non-zero weights for this vert
-        wPlug.getExistingArrayAttributeIndices(wInfIds)
-
-        # create a copy of the current wPlug
-        infPlug = OpenMaya.MPlug(wPlug)
-        for infId in wInfIds:
-            # tell the infPlug it represents the current influence id
-            infPlug.selectAncestorLogicalIndex(infId, wAttr)
+    if sys.version.startswith("3"):
+        for vId in range(wlPlug.numElements()):
+            vWeights = {}
+            # tell the weights attribute which vertex id it represents
+            wPlug.selectAncestorLogicalIndex(vId, wlAttr)
             
-            # add this influence and its weight to this verts weights
-            try:
-                vWeights[infIds[infId]] = infPlug.asDouble()
-            except KeyError:
-                # assumes a removed influence
-                pass
+            # get the indice of all non-zero weights for this vert
+            wPlug.getExistingArrayAttributeIndices(wInfIds)
+
+            # create a copy of the current wPlug
+            infPlug = OpenMaya.MPlug(wPlug)
+            for infId in wInfIds:
+                # tell the infPlug it represents the current influence id
+                infPlug.selectAncestorLogicalIndex(infId, wAttr)
                 
-        weights[vId] = vWeights
-        
-    return weights
+                # add this influence and its weight to this verts weights
+                try:
+                    vWeights[infIds[infId]] = infPlug.asDouble()
+                except KeyError:
+                    # assumes a removed influence
+                    pass
+                    
+            weights[vId] = vWeights
+            
+        return weights
+    elif sys.version.startswith("2"):
+        for vId in xrange(wlPlug.numElements()):
+            vWeights = {}
+            # tell the weights attribute which vertex id it represents
+            wPlug.selectAncestorLogicalIndex(vId, wlAttr)
+            
+            # get the indice of all non-zero weights for this vert
+            wPlug.getExistingArrayAttributeIndices(wInfIds)
+
+            # create a copy of the current wPlug
+            infPlug = OpenMaya.MPlug(wPlug)
+            for infId in wInfIds:
+                # tell the infPlug it represents the current influence id
+                infPlug.selectAncestorLogicalIndex(infId, wAttr)
+                
+                # add this influence and its weight to this verts weights
+                try:
+                    vWeights[infIds[infId]] = infPlug.asDouble()
+                except KeyError:
+                    # assumes a removed influence
+                    pass
+                    
+            weights[vId] = vWeights
+            
+        return weights
+

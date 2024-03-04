@@ -1,4 +1,5 @@
 import os
+import sys
 from maya import OpenMaya, OpenMayaUI, cmds
 
 
@@ -7,15 +8,27 @@ from maya import OpenMaya, OpenMayaUI, cmds
 
 # import pyside, do qt version check for maya 2017 >
 qtVersion = cmds.about(qtVersion=True)
-if qtVersion.startswith("4") or type(qtVersion) not in [str]:
-    from PySide.QtGui import *
-    from PySide.QtCore import *
-    import shiboken
-else:
-    from PySide2.QtGui import *
-    from PySide2.QtCore import *
-    from PySide2.QtWidgets import *
-    import shiboken2 as shiboken
+if sys.version.startswith("2"):
+    if qtVersion.startswith("4") or type(qtVersion) not in [str, unicode]:
+        from PySide.QtGui import *
+        from PySide.QtCore import *
+        import shiboken
+    else:
+        from PySide2.QtGui import *
+        from PySide2.QtCore import *
+        from PySide2.QtWidgets import *
+        import shiboken2 as shiboken
+elif sys.version.startswith("3"):
+    if qtVersion.startswith("4") or type(qtVersion) not in [str]:
+        from PySide.QtGui import *
+        from PySide.QtCore import *
+        import shiboken
+    else:
+        from PySide2.QtGui import *
+        from PySide2.QtCore import *
+        from PySide2.QtWidgets import *
+        import shiboken2 as shiboken
+
 
 
 # ----------------------------------------------------------------------------
@@ -59,7 +72,10 @@ def mayaWindow():
     :rtype: QMainWindow
     """
     window = OpenMayaUI.MQtUtil.mainWindow()
-    window = shiboken.wrapInstance(int(window), QMainWindow)
+    if sys.version.startswith("3"):
+        window = shiboken.wrapInstance(int(window), QMainWindow)
+    elif sys.version.startswith("2"):
+        window = shiboken.wrapInstance(long(window), QMainWindow)
     
     return window  
 

@@ -1,9 +1,14 @@
 from . import utils
 from .. import checks, collections
+import sys
 
 
 class CollectionsWidget(utils.QWidget):
-    currentIndexChanged = utils.Signal(str)
+
+    if sys.version.startswith("2"):
+        currentIndexChanged = utils.Signal(unicode)
+    elif sys.version.startswith("3"):
+        currentIndexChanged = utils.Signal(str)
 
     def __init__(self, parent, collection):
         utils.QWidget.__init__(self, parent)
@@ -18,11 +23,19 @@ class CollectionsWidget(utils.QWidget):
 
         self.collection = utils.QComboBox(self)
         self.collection.addItems(overview)
-        self.collection.setCurrentIndex(
-            list(overview).index(collection)
+        if sys.version.startswith("3"):
+            self.collection.setCurrentIndex(
+                list(overview).index(collection)
+                if collection in overview
+                else 0
+            )
+        elif sys.version.startswith("2"):
+            self.collection.setCurrentIndex(
+            overview.index(collection)
             if collection in overview
             else 0
-        )
+            )
+
         self.collection.currentIndexChanged.connect(self.trigger)
         self.collection.setFont(utils.FONT)
         layout.addWidget(self.collection)
@@ -356,16 +369,32 @@ class QualityAssuranceWidget(utils.QWidget):
         # get checks
         data = checks.getChecksFromCollection(collection)
         number = 1
-        for categoryName, checkList in data.items():
+        if sys.version.startswith("2"):
+            for categoryName, checkList in data.iteritems():
             # create category
-            category = CategoryWidget(self, categoryName)
-            self.layout.insertWidget(self.layout.count()-1, category)
+                category = CategoryWidget(self, categoryName)
+                self.layout.insertWidget(self.layout.count()-1, category)
 
-            # create checks
-            for check in checkList:
-                widget = CheckWidget(self, check, number)
-                self.widgets.append(widget)
+                # create checks
+                for check in checkList:
+                    widget = CheckWidget(self, check, number)
+                    self.widgets.append(widget)
 
-                # add check to category
-                category.addWidget(widget)
-                number += 1
+                    # add check to category
+                    category.addWidget(widget)
+                    number += 1
+        elif sys.version.startswith("3"):
+            for categoryName, checkList in data.items():
+                # create category
+                category = CategoryWidget(self, categoryName)
+                self.layout.insertWidget(self.layout.count()-1, category)
+
+                # create checks
+                for check in checkList:
+                    widget = CheckWidget(self, check, number)
+                    self.widgets.append(widget)
+
+                    # add check to category
+                    category.addWidget(widget)
+                    number += 1
+        

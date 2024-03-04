@@ -297,8 +297,13 @@ class HyperBookmarks(QualityAssurance):
             pass
         finally:
             # reset connections locked state
-            for node, state in hyperPositionStored.items():
-                cmds.lockNode(node, lock=state)
+            if sys.version.startswith("3"):
+                for node, state in hyperPositionStored.items():
+                    cmds.lockNode(node, lock=state)
+            elif sys.version.startswith("2"):
+                for node, state in hyperPositionStored.iteritems():
+                    cmds.lockNode(node, lock=state)
+
 
 
 class EmptyTransform(QualityAssurance):

@@ -152,13 +152,14 @@ class QualityAssurance(object):
             for error in self.errors[:]:
                 # remove objects that might have been deleted in other
                 # quality assurance checks.
-
-                if self.isSelectable() and (
-                        type(error) in [str]
-                        and not cmds.objExists(error)
-                ):
-                    self._errors.remove(error)
-                    continue
+                if sys.version.startswith("2"):
+                    if self.isSelectable() and (type(error) in [str, unicode] and not cmds.objExists(error)):
+                        self._errors.remove(error)
+                        continue
+                elif sys.version.startswith("3"):
+                    if self.isSelectable() and (type(error) in [str] and not cmds.objExists(error)):
+                        self._errors.remove(error)
+                        continue
 
                 try:
                     self._fix(error)
