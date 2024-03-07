@@ -10,9 +10,9 @@ class CustomShaderGroup(QualityAssurance):
     def __init__(self):
         QualityAssurance.__init__(self)
 
-        self._name = "Custom GLSL shaders applied"
-        self._message = "{0} object(s) are not assigned with Custom shader"
-        self._categories = ["Custom Shaders"]
+        self._name = "In-game GLSL shaders applied"
+        self._message = "{0} object(s) are not assigned with In-game shader"
+        self._categories = ["In-game Shaders"]
         self._selectable = True
 
     # ------------------------------------------------------------------------
@@ -42,7 +42,7 @@ class CustomShaderTechnique(QualityAssurance):
 
         self._name = "Shader Technique"
         self._message = "{0} shader(s) set to Uber-Transparent"
-        self._categories = ["Custom Shaders"]
+        self._categories = ["In-game Shaders"]
         self._selectable = True
 
 

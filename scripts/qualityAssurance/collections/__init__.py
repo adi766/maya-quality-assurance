@@ -18,7 +18,7 @@ COLLECTION = OrderedDict(
                 "UV",
                 "Rigging",
                 "Skinning",
-                "Custom Shaders",
+                "In-game Shaders",
                 "Shaders",
                 "Scene"
             ]
@@ -28,6 +28,7 @@ COLLECTION = OrderedDict(
                 "Modelling",
                 "Geometry",
                 "UV",
+                "In-game Shaders",
                 "Shaders",
                 "Scene",
             ]
