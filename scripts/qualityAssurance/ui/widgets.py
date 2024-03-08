@@ -182,7 +182,7 @@ class CheckWidget(utils.QWidget):
         self.selectionOnly = utils.QCheckBox(self)
         self.selectionOnly.setMinimumSize(16, 16)
         self.selectionOnly.setMaximumSize(16, 16)
-        self.selectionOnly.setToolTip("Perform Check on Selection Only")
+        self.selectionOnly.setToolTip("Click to ignore this check")
         layout.addWidget(self.selectionOnly)
 
         if not self.check.isSelectable():
