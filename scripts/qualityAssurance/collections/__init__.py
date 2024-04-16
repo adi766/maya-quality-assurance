@@ -13,7 +13,7 @@ COLLECTION = OrderedDict(
     [
         (
             "Overall QA/ Pre-Implementation", [
-                "Modelling",
+                "Model",
                 "Geometry",
                 "UV",
                 "Rigging",
@@ -24,8 +24,8 @@ COLLECTION = OrderedDict(
             ]
         ),
         (
-            "modelling", [
-                "Modelling",
+            "Modeling", [
+                "Model",
                 "Geometry",
                 "UV",
                 "In-game Shaders",

@@ -12,7 +12,7 @@ class FreezeTransforms(QualityAssurance):
 
         self._name = "Freeze Transforms"
         self._message = "{0} transform(s) are not frozen"
-        self._categories = ["Modelling"]
+        self._categories = ["Model"]
         self._selectable = True
 
         self._ignoreNodes = ["|persp", "|front", "|top", "|side", "|left", "|back", "|bottom"]
@@ -90,7 +90,7 @@ class ZeroPivot(QualityAssurance):
 
         self._name = "Zero Pivot"
         self._message = "{0} pivot(s) are not on origin"
-        self._categories = ["Modelling"]
+        self._categories = ["Model"]
         self._selectable = True
 
     # ------------------------------------------------------------------------
@@ -133,7 +133,7 @@ class DeleteHistory(QualityAssurance):
 
         self._name = "History"
         self._message = "{0} mesh(es) contain history nodes"
-        self._categories = ["Modelling"]
+        self._categories = ["Model"]
         self._selectable = True
 
         self._ignoreNodes = [
@@ -188,7 +188,7 @@ class TransformSuffix(QualityAssurance):
 
         self._name = "Mesh suffix naming convention"
         self._message = "{0} mesh(es) with wrong naming"
-        self._categories = ["Modelling"]
+        self._categories = ["Model"]
         self._selectable = True
 
     # ------------------------------------------------------------------------
@@ -220,7 +220,7 @@ class DeleteAnimation(QualityAssurance):
 
         self._name = "Animation"
         self._message = "{0} animation curve(s) in the scene"
-        self._categories = ["Modelling"]
+        self._categories = ["Model"]
         self._selectable = True
 
     # ------------------------------------------------------------------------
