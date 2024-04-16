@@ -21,7 +21,7 @@ class DeleteNonDeformerHistory(QualityAssurance):
             "geometryFilter", "tweak", "groupParts",
             "groupId", "shape", "dagPose",
             "joint", "shadingEngine", "cluster",
-            "transform", "diskCache", "time"
+            "transform", "diskCache", "time", "objectSet"
         ]
 
     # ------------------------------------------------------------------------

@@ -138,7 +138,7 @@ class DeleteHistory(QualityAssurance):
 
         self._ignoreNodes = [
             "tweak", "groupParts", "groupId",
-            "shape", "shadingEngine", "mesh"
+            "shape", "shadingEngine", "mesh", "objectSet"
         ]
 
 
@@ -168,11 +168,9 @@ class DeleteHistory(QualityAssurance):
             types = [cmds.nodeType(h) for h in history]
 
             for t in types:
-                if t in self.ignoreNodes:
-                    continue
-
-                yield mesh
-                break
+                if not t in self.ignoreNodes:
+                    yield mesh
+                    break
 
     def _fix(self, mesh):
         """
