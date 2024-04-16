@@ -28,9 +28,9 @@ COLLECTION = OrderedDict(
                 "Model",
                 "Geometry",
                 "UV",
-                "In-game Shaders",
                 "Shaders",
                 "Scene",
+                "In-game Shaders",
             ]
         ),
         (
