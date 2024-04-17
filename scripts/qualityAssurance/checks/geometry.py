@@ -111,6 +111,7 @@ class OverlappingFaces(QualityAssurance):
             allPoints = []
             allIndices = []
 
+            print('mesh---------------', path)
             # loop faces
             while not faceIter.isDone():
                 # get world space positions
@@ -119,13 +120,13 @@ class OverlappingFaces(QualityAssurance):
 
                 # sort points
                 points = [
-                    sorted(
-                        [
-                            round(points[i][0], 8),
-                            round(points[i][1], 8),
-                            round(points[i][2], 8)
-                        ]
-                    )
+                    #sorted(
+                    [
+                        round(points[i][0], 5),
+                        round(points[i][1], 5),
+                        round(points[i][2], 5)
+                    ]
+                    #)
                     for i in range(points.length())
                 ]
 
