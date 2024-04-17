@@ -330,6 +330,8 @@ class QualityAssuranceWidget(utils.QWidget):
                 continue
 
             widget.doFind()
+            self.repaint()
+            utils.QCoreApplication.processEvents()
 
     def doFixAll(self):
         """
