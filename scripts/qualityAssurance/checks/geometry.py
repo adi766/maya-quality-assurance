@@ -420,12 +420,3 @@ class LockedNormals(QualityAssurance):
 
             if True in normals:
                 yield mesh
-
-    def _fix(self, mesh):
-        """
-        :param str mesh:
-        """
-        cmds.polyNormalPerVertex(
-            "{0}.vtx[*]".format(mesh),
-            unFreezeNormal=True
-        )
