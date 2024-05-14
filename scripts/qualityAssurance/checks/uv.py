@@ -1,6 +1,71 @@
 from maya import cmds
 from ..utils import QualityAssurance, reference
 
+class UVSetMap1(QualityAssurance):
+    """Ensure meshes have the default UV set"""
+    def __init__(self):
+        QualityAssurance.__init__(self)
+
+        self._name = "Has UV set map1"
+        self._message = "{0} mesh has map1 renamed and must be fixed"
+        self._categories = ["UV"]
+        self._selectable = False
+    # ------------------------------------------------------------------------
+    def _find(self):
+        """
+        :return: list of meshes without map1 uv set
+        :rtype: generator
+        """
+        meshes = cmds.ls(type='mesh', long=True)
+
+        invalid = []
+        for mesh in meshes:
+
+            # Get existing mapping of uv sets by index
+            indices = cmds.polyUVSet(mesh, query=True, allUVSetsIndices=True)
+            maps = cmds.polyUVSet(mesh, query=True, allUVSets=True)
+            mapping = dict(zip(indices, maps))
+
+            # Get the uv set at index zero.
+            name = mapping[0]
+            if name != "map1":
+                yield mesh
+
+
+    def _fix(self, mesh):
+        """
+        :param str animCurve:
+        """
+        print(mesh)
+        # Get existing mapping of uv sets by index
+        indices = cmds.polyUVSet(mesh, query=True, allUVSetsIndices=True)
+        maps = cmds.polyUVSet(mesh, query=True, allUVSets=True)
+        mapping = dict(zip(indices, maps))
+
+        # Ensure there is no uv set named map1 to avoid
+        # a clash on renaming the "default uv set" to map1
+        existing = set(maps)
+        if "map1" in existing:
+            print('existing')
+            # Find a unique name index
+            i = 2
+            while True:
+                name = "map{0}".format(i)
+                if name not in existing:
+                    break
+                i += 1
+
+            cmds.polyUVSet(mesh,
+                            rename=True,
+                            uvSet="map1",
+                            newUVSet=name)
+
+        # Rename the initial index to map1
+        original = mapping[0]
+        cmds.polyUVSet(mesh,
+                        rename=True,
+                        uvSet=original,
+                        newUVSet="map1")
 
 class EmptyUVSets(QualityAssurance):
     """
@@ -13,7 +78,7 @@ class EmptyUVSets(QualityAssurance):
         self._name = "Empty UV Sets"
         self._message = "{0} empty uv set(s)"
         self._categories = ["UV"]
-        self._selectable = False
+        self._selectable = True
 
     # ------------------------------------------------------------------------
 
@@ -57,7 +122,7 @@ class UnusedUVSets(QualityAssurance):
         self._name = "Unused UV Sets"
         self._message = "{0} unused uv set(s)"
         self._categories = ["UV"]
-        self._selectable = False
+        self._selectable = True
 
         self._ignoreUvSets = [
             "hairUVSet",
@@ -99,3 +164,6 @@ class UnusedUVSets(QualityAssurance):
         uvSet = cmds.getAttr(meshAttribute)
 
         cmds.polyUVSet(mesh, edit=True, delete=True, uvSet=uvSet)
+
+
+
