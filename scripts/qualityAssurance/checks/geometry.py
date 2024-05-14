@@ -157,6 +157,55 @@ class OverlappingFaces(QualityAssurance):
         """
         cmds.delete(faces)
 
+
+class ConcaveFaces(QualityAssurance):
+    """
+    Finds concave faces.
+    """
+    def __init__(self):
+        QualityAssurance.__init__(self)
+
+        self._name = "Concave Faces"
+        self._message = "{0} objects with concave face(s)"
+        self._categories = ["Geometry"]
+        self._selectable = True
+
+    # ------------------------------------------------------------------------
+
+    def _find(self):
+        """
+        :return: Zero length edges
+        :rtype: generator
+        """
+        # variables
+        obj = OpenMaya.MObject()
+        meshIter = self.lsApi(nodeType=OpenMaya.MFn.kMesh)
+
+        while not meshIter.isDone():
+            concave_faces = []
+
+            meshIter.getDependNode(obj)
+            dagNode = OpenMaya.MDagPath.getAPathTo(obj)
+            path = dagNode.fullPathName()
+
+            if cmds.referenceQuery(path, inr=True):
+                meshIter.next()
+                continue
+
+            mesh_fn = OpenMaya.MFnMesh(dagNode)
+
+            num_polygons = mesh_fn.numPolygons()
+            for face_index in range(num_polygons):
+                if not mesh_fn.isPolygonConvex(face_index):
+                    concave_faces.append("{0}.f[{1}]".format(path, face_index))
+
+            meshIter.next()
+
+            if not concave_faces:
+                continue
+
+            yield concave_faces
+
 class ZeroEdgeLength(QualityAssurance):
     """
     Find edges no length.
