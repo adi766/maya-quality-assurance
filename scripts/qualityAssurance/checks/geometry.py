@@ -469,3 +469,53 @@ class LockedNormals(QualityAssurance):
 
             if True in normals:
                 yield mesh
+
+
+class BorderEdges(QualityAssurance):
+    """
+    Finds border edges, this is not an issue,  but sometimes certain
+    edges needs to be mearged.
+    """
+    def __init__(self):
+        QualityAssurance.__init__(self)
+
+        self._name = "Border Edges"
+        self._urgency = 0
+        self._message = "{0} border edge(s)"
+        self._categories = ["Geometry"]
+        self._selectable = True
+
+    # ------------------------------------------------------------------------
+
+    def _find(self):
+        """
+        :return: Border edges
+        :rtype: generator
+        """
+        # variables
+        obj = OpenMaya.MObject()
+
+        # get mesh iterator
+        meshIter = self.lsApi(nodeType=OpenMaya.MFn.kMesh)
+
+        # iterate meshes
+        while not meshIter.isDone():
+            meshIter.getDependNode(obj)
+            dagNode = OpenMaya.MDagPath.getAPathTo(obj)
+            path = dagNode.fullPathName()
+
+            # ignore references
+            if cmds.referenceQuery(path, inr=True):
+                meshIter.next()
+                continue
+
+            # iterate edges
+            edgeIter = OpenMaya.MItMeshEdge(dagNode)
+            while not edgeIter.isDone():
+                # check if edge is a boundary edge
+                if edgeIter.onBoundary():
+                    index = edgeIter.index()
+                    yield "{0}.e[{1}]".format(path, index)
+
+                edgeIter.next()
+            meshIter.next()
