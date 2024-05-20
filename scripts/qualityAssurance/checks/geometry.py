@@ -174,7 +174,7 @@ class ConcaveFaces(QualityAssurance):
 
     def _find(self):
         """
-        :return: Zero length edges
+        :return: Concave faces
         :rtype: generator
         """
         # variables

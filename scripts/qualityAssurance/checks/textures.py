@@ -8,9 +8,8 @@ from ..utils import QualityAssurance, reference
 
 class Lambert1connections(QualityAssurance):
     """
-    Animation curves will be checked to see if they are not set driven keys.
-    Non set driven keys should not be present in the scene and will be deleted
-    when fixing this error.
+    Checks if any nodes is connected to the initialShadingGroup (lambert1)
+    Fixing will delete the node(s)
     """
     def __init__(self):
         QualityAssurance.__init__(self)
@@ -46,14 +45,13 @@ class Lambert1connections(QualityAssurance):
 
 class NonExistingTextures(QualityAssurance):
     """
-    Animation curves will be checked to see if they are not set driven keys.
-    Non set driven keys should not be present in the scene and will be deleted
-    when fixing this error.
+    Check if there exist any texture that do not exist!
     """
     def __init__(self):
         QualityAssurance.__init__(self)
 
         self._name = "Non Existing Textures"
+        self._urgency = 1
         self._message = "{0} file(s) contain a link to a not existing texture"
         self._categories = ["Textures"]
         self._selectable = True
@@ -62,7 +60,7 @@ class NonExistingTextures(QualityAssurance):
 
     def _find(self):
         """
-        :return: Meshes with non-deformer history
+        :return: Textures that dont exist
         :rtype: generator
         """
         fileNodes = self.ls(type="file")
@@ -71,8 +69,3 @@ class NonExistingTextures(QualityAssurance):
             if not os.path.exists(path):
                 yield fileNode
 
-    def _fix(self, fileNode):
-        """
-        :param str fileNode:
-        """
-        cmds.setAttr("{0}.disableFileLoad".format(fileNode), 1)
