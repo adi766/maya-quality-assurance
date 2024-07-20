@@ -1,6 +1,34 @@
 from maya import cmds
 from ..utils import QualityAssurance, reference
 
+class NoUVSell(QualityAssurance):
+    """Ensure meshes have UVs"""
+    def __init__(self):
+        QualityAssurance.__init__(self)
+
+        self._name = "All mesh has UVs"
+        self._message = "{0} face(s) with no UV"
+        self._categories = ["UV"]
+        self._selectable = True
+
+    def _find(self):
+        """
+        :return: list of faces without uvs
+        :rtype: generator
+        """
+        meshes = cmds.ls(type='mesh', long=True)
+        faces = []
+        for mesh in meshes:
+            # Get the faces for each mesh and concatenate '.f[:]' to each face
+            mesh_faces = cmds.ls(mesh + '.f[:]', flatten=True)
+            faces.extend(mesh_faces)
+
+        for face in faces:
+            # Check if the face has a UV shell
+            uv_shell = cmds.polyListComponentConversion(face, fromFace=True, toUV=True)
+            if not uv_shell:
+                yield face
+                
 class UVSetMap1(QualityAssurance):
     """Ensure meshes have the default UV set"""
     def __init__(self):
