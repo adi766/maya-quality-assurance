@@ -249,7 +249,7 @@ class ZeroEdgeLength(QualityAssurance):
             while not edgeIter.isDone():
                 # get edge length
                 edgeIter.getLength(edgeLengthPntr, OpenMaya.MSpace.kWorld)
-                if edgeLength.getDouble(edgeLengthPntr) < 0.00001:
+                if edgeLength.getDouble(edgeLengthPntr) < 0.01:
                     index = edgeIter.index()
                     yield "{0}.e[{1}]".format(path, index)
 
