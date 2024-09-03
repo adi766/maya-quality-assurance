@@ -1,4 +1,6 @@
 from maya import cmds, OpenMaya
+import maya.api.OpenMaya as OpenMayaApi
+
 from ..utils import QualityAssurance, reference
 
 
@@ -160,13 +162,13 @@ class OverlappingFaces(QualityAssurance):
 
 class ConcaveFaces(QualityAssurance):
     """
-    Finds concave faces.
+    Find concave faces in all meshes in the scene.
     """
     def __init__(self):
         QualityAssurance.__init__(self)
 
         self._name = "Concave Faces"
-        self._message = "{0} objects with concave face(s)"
+        self._message = "{0} concave face(s) found"
         self._categories = ["Geometry"]
         self._selectable = True
 
@@ -177,34 +179,61 @@ class ConcaveFaces(QualityAssurance):
         :return: Concave faces
         :rtype: generator
         """
-        # variables
-        obj = OpenMaya.MObject()
-        meshIter = self.lsApi(nodeType=OpenMaya.MFn.kMesh)
+        # List all mesh nodes in the scene
+        meshNodes = cmds.ls(type='mesh')
+        if not meshNodes:
+            OpenMayaApi.MGlobal.displayInfo("No mesh nodes found in the scene.")
+            return
 
-        while not meshIter.isDone():
-            concave_faces = []
+        for meshNode in meshNodes:
+            # Get the transform node connected to the mesh
+            transformNode = cmds.listRelatives(meshNode, parent=True)[0]
 
-            meshIter.getDependNode(obj)
-            dagNode = OpenMaya.MDagPath.getAPathTo(obj)
-            path = dagNode.fullPathName()
+            # Get the full path name of the transform node
+            transformPath = cmds.ls(transformNode, long=True)[0]
 
-            if cmds.referenceQuery(path, inr=True):
-                meshIter.next()
-                continue
+            # Get the MObject for the transform node
+            selList = OpenMayaApi.MSelectionList()
+            selList.add(transformPath)
+            transformDagPath = selList.getDagPath(0)
 
-            mesh_fn = OpenMaya.MFnMesh(dagNode)
+            # Get the mesh MObject from the transform node
+            meshFn = OpenMayaApi.MFnMesh(transformDagPath)
+            meshPath = transformDagPath.extendToShape()
 
-            num_polygons = mesh_fn.numPolygons()
-            for face_index in range(num_polygons):
-                if not mesh_fn.isPolygonConvex(face_index):
-                    concave_faces.append("{0}.f[{1}]".format(path, face_index))
+            # Iterate through all the faces of the mesh
+            for faceIndex in range(meshFn.numPolygons):
+                faceVertices = meshFn.getPolygonVertices(faceIndex)
+                facePoints = meshFn.getPoints()
+                numEdges = len(faceVertices)
 
-            meshIter.next()
+                # Compute face normal
+                normal = meshFn.getPolygonNormal(faceIndex, OpenMayaApi.MSpace.kWorld)
 
-            if not concave_faces:
-                continue
+                is_concave = False
 
-            yield concave_faces
+                # Check angles between each pair of consecutive edges
+                for j in range(numEdges):
+                    # Get vertex positions for edge j and j+1 (loop around with %)
+                    p1 = OpenMayaApi.MVector(facePoints[faceVertices[j]])
+                    p2 = OpenMayaApi.MVector(facePoints[faceVertices[(j + 1) % numEdges]])
+                    p3 = OpenMayaApi.MVector(facePoints[faceVertices[(j + 2) % numEdges]])
+
+                    # Compute edge vectors
+                    edge1 = p2 - p1
+                    edge2 = p3 - p2
+
+                    # Calculate the cross product to determine if the angle is concave
+                    cross_product = edge1 ^ edge2
+                    dot_product = cross_product * normal
+
+                    if dot_product < 0:
+                        is_concave = True
+                        break
+
+                if is_concave:
+                    yield "{}.f[{}]".format(transformPath, faceIndex)
+
 
 class ZeroEdgeLength(QualityAssurance):
     """
@@ -249,7 +278,7 @@ class ZeroEdgeLength(QualityAssurance):
             while not edgeIter.isDone():
                 # get edge length
                 edgeIter.getLength(edgeLengthPntr, OpenMaya.MSpace.kWorld)
-                if edgeLength.getDouble(edgeLengthPntr) < 0.01:
+                if edgeLength.getDouble(edgeLengthPntr) < 0.00001:
                     index = edgeIter.index()
                     yield "{0}.e[{1}]".format(path, index)
 
@@ -300,7 +329,7 @@ class ZeroAreaFaces(QualityAssurance):
             while not faceIter.isDone():
                 # get face area
                 faceIter.getArea(faceAreaPntr, OpenMaya.MSpace.kWorld)
-                if faceArea.getDouble(faceAreaPntr) < 0.00001:
+                if faceArea.getDouble(faceAreaPntr) < 0.0001:
                     index = faceIter.index()
                     yield "{0}.f[{1}]".format(path, index)
 
