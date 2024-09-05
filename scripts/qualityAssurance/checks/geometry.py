@@ -1,5 +1,4 @@
 from maya import cmds, OpenMaya
-import maya.api.OpenMaya as OpenMayaApi
 
 from ..utils import QualityAssurance, reference
 
