@@ -1,8 +1,10 @@
-from maya import cmds
+from maya import cmds, OpenMaya
 from ..utils import QualityAssurance, reference
 
 class NoUVSell(QualityAssurance):
-    """Ensure meshes have UVs"""
+    """
+    Find faces that have no UVs.
+    """
     def __init__(self):
         QualityAssurance.__init__(self)
 
@@ -11,23 +13,43 @@ class NoUVSell(QualityAssurance):
         self._categories = ["UV"]
         self._selectable = True
 
+    # ------------------------------------------------------------------------
+
     def _find(self):
         """
-        :return: list of faces without uvs
+        :return: Faces without UVs
         :rtype: generator
         """
-        meshes = cmds.ls(type='mesh', long=True)
-        faces = []
-        for mesh in meshes:
-            # Get the faces for each mesh and concatenate '.f[:]' to each face
-            mesh_faces = cmds.ls(mesh + '.f[:]', flatten=True)
-            faces.extend(mesh_faces)
+        # variables
+        obj = OpenMaya.MObject()
 
-        for face in faces:
-            # Check if the face has a UV shell
-            uv_shell = cmds.polyListComponentConversion(face, fromFace=True, toUV=True)
-            if not uv_shell:
-                yield face
+        # get mesh iterator
+        meshIter = self.lsApi(nodeType=OpenMaya.MFn.kMesh)
+
+        # iterate meshes
+        while not meshIter.isDone():
+            meshIter.getDependNode(obj)
+            dagNode = OpenMaya.MDagPath.getAPathTo(obj)
+            path = dagNode.fullPathName()
+
+            # ignore references
+            if cmds.referenceQuery(path, inr=True):
+                meshIter.next()
+                continue
+
+            # iterate faces
+            faceIter = OpenMaya.MItMeshPolygon(dagNode)
+            while not faceIter.isDone():
+                # Check if the face has UVs
+                hasUVs = faceIter.hasUVs()
+                if not hasUVs:
+                    index = faceIter.index()
+                    yield "{0}.f[{1}]".format(path, index)
+
+                faceIter.next()
+            meshIter.next()
+
+
                 
 class UVSetMap1(QualityAssurance):
     """Ensure meshes have the default UV set"""

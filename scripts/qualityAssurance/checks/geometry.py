@@ -182,42 +182,46 @@ class ConcaveFaces(QualityAssurance):
         # List all mesh nodes in the scene
         meshNodes = cmds.ls(type='mesh')
         if not meshNodes:
-            OpenMayaApi.MGlobal.displayInfo("No mesh nodes found in the scene.")
+            OpenMaya.MGlobal.displayInfo("No mesh nodes found in the scene.")
             return
 
         for meshNode in meshNodes:
             # Get the transform node connected to the mesh
-            transformNode = cmds.listRelatives(meshNode, parent=True)[0]
+            transformNode = cmds.listRelatives(meshNode, parent=True, fullPath=True)[0]
 
-            # Get the full path name of the transform node
-            transformPath = cmds.ls(transformNode, long=True)[0]
+            # Get the MObject for the shape node (mesh node)
+            selList = OpenMaya.MSelectionList()
+            selList.add(meshNode)
 
-            # Get the MObject for the transform node
-            selList = OpenMayaApi.MSelectionList()
-            selList.add(transformPath)
-            transformDagPath = selList.getDagPath(0)
+            # Create an MDagPath object to store the result
+            meshDagPath = OpenMaya.MDagPath()
+            selList.getDagPath(0, meshDagPath)  # Pass the meshDagPath reference to be populated
 
-            # Get the mesh MObject from the transform node
-            meshFn = OpenMayaApi.MFnMesh(transformDagPath)
-            meshPath = transformDagPath.extendToShape()
+            # Create an MFnMesh function set to operate on the mesh
+            meshFn = OpenMaya.MFnMesh(meshDagPath)
+
+            # Get the points of the mesh
+            facePoints = OpenMaya.MPointArray()  # Create an MPointArray to hold the points
+            meshFn.getPoints(facePoints, OpenMaya.MSpace.kWorld)  # Pass the MPointArray and space
 
             # Iterate through all the faces of the mesh
-            for faceIndex in range(meshFn.numPolygons):
-                faceVertices = meshFn.getPolygonVertices(faceIndex)
-                facePoints = meshFn.getPoints()
-                numEdges = len(faceVertices)
+            for faceIndex in range(meshFn.numPolygons()):  # Corrected method call
+                faceVertices = OpenMaya.MIntArray()  # Create an MIntArray to hold the vertex indices
+                meshFn.getPolygonVertices(faceIndex, faceVertices)  # Pass the faceIndex and MIntArray
+                numEdges = faceVertices.length()  # Get the number of vertices
 
                 # Compute face normal
-                normal = meshFn.getPolygonNormal(faceIndex, OpenMayaApi.MSpace.kWorld)
+                normal = OpenMaya.MVector()
+                meshFn.getPolygonNormal(faceIndex, normal, OpenMaya.MSpace.kWorld)
 
                 is_concave = False
 
                 # Check angles between each pair of consecutive edges
                 for j in range(numEdges):
                     # Get vertex positions for edge j and j+1 (loop around with %)
-                    p1 = OpenMayaApi.MVector(facePoints[faceVertices[j]])
-                    p2 = OpenMayaApi.MVector(facePoints[faceVertices[(j + 1) % numEdges]])
-                    p3 = OpenMayaApi.MVector(facePoints[faceVertices[(j + 2) % numEdges]])
+                    p1 = OpenMaya.MVector(facePoints[faceVertices[j]])
+                    p2 = OpenMaya.MVector(facePoints[faceVertices[(j + 1) % numEdges]])
+                    p3 = OpenMaya.MVector(facePoints[faceVertices[(j + 2) % numEdges]])
 
                     # Compute edge vectors
                     edge1 = p2 - p1
@@ -232,7 +236,12 @@ class ConcaveFaces(QualityAssurance):
                         break
 
                 if is_concave:
-                    yield "{}.f[{}]".format(transformPath, faceIndex)
+                    yield "{}.f[{}]".format(transformNode, faceIndex)
+
+
+
+
+
 
 
 class ZeroEdgeLength(QualityAssurance):
